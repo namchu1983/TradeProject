@@ -1,5 +1,4 @@
-﻿using System;
-using TradeProject.Lib.Service;
+﻿using TradeProject.Lib.Service;
 
 namespace TradeProject
 {
