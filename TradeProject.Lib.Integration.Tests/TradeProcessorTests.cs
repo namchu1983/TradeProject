@@ -22,8 +22,7 @@ namespace TradeProject.Lib.Integration.Tests
             var outputFilePath = Path.Combine(GetDataFolder(), outputFile);
             var expectedFilePath = Path.Combine(GetDataFolder(), expectedFile);
             var logFilePath = Path.Combine(GetDataFolder(), logFile);
-            ITradeProcessor tradeProcessor = new TradeProcessor(new XmlInputReader(), new TradeAggregator(),
-                new CsvWriter(), new LogConfigurator());
+            ITradeProcessor tradeProcessor = new TradeProcessor();
             tradeProcessor.Process(inputFilePath, outputFilePath, logFilePath);
             Assert.IsTrue(File.Exists(outputFilePath));
             CollectionAssert.AreEqual(File.ReadAllLines(expectedFilePath), File.ReadAllLines(outputFilePath));

@@ -3,46 +3,65 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 using Serilog;
 using TradeProject.Lib.Model;
 
 namespace TradeProject.Lib.Service
 {
-    public class XmlInputReader : IXmlInputReader
+    public class XmlInputReader : IXmlInputReader, IDisposable
     {
-        public IEnumerable<Trade> GetTrades(string filename)
+        private readonly StreamReader _streamReader;
+
+        public XmlInputReader(StreamReader streamReader)
         {
-            if (string.IsNullOrWhiteSpace(filename) || !File.Exists(filename))
-            {
-                Log.Error("The file {filename} is invalid", filename);
-                throw new FileNotFoundException(filename);
-            }
-            Log.Information("Start to read XML file : {filename}", filename);
-            var trades = GetTrades(File.ReadLines(filename));
-            Log.Information("End to read XML file : {filename}", filename);
-            return trades;
+            _streamReader = streamReader;
         }
 
-        public IEnumerable<Trade> GetTrades(IEnumerable<string> lines)
+        public XmlInputReader(string fileName)
         {
+            if (string.IsNullOrWhiteSpace(fileName) || !File.Exists(fileName))
+            {
+                Log.Error("The file {filename} is invalid", fileName);
+                throw new FileNotFoundException(fileName);
+            }
+            Log.Information("Create XML stream reader from file : {fileName}", fileName);
+            _streamReader = new StreamReader(fileName);
+        }
+
+        public IEnumerable<Trade> GetTrades()
+        {
+            Log.Information("Start to read XML file ");
+
             var serializer = new XmlSerializer(typeof(Trade));
-            return lines.Where(line => line.Contains("<Trade "))
-                .Select(line =>
+            using (XmlReader reader = XmlReader.Create(_streamReader))
+            {
+                reader.MoveToContent();
+                while (reader.Read())
                 {
-                    try
+                    switch (reader.NodeType)
                     {
-                        using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(line)))
-                        {
-                            return (Trade)serializer.Deserialize(stream);
-                        }
+                        case XmlNodeType.Element:
+                            if (reader.Name == "Trade")
+                            {
+                                var el = XNode.ReadFrom(reader) as XElement;
+                                if (el != null)
+                                {
+                                    yield return (Trade)serializer.Deserialize(el.CreateReader());
+                                }
+                            }
+                            break;
                     }
-                    catch (Exception)
-                    {
-                        Log.Error("Cannot parse this line to Trade object:\n{line} ", line);
-                        throw;
-                    }
-                });
+                }
+            }
+            Log.Information("End to read XML file");
+        }
+
+        public void Dispose()
+        {
+            _streamReader?.Dispose();
         }
     }
 }

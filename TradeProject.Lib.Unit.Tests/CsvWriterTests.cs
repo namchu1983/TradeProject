@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 using TradeProject.Lib.Model;
@@ -38,6 +40,13 @@ namespace TradeProject.Lib.Unit.Tests
             {
                 Directory.Delete(GetTempFolder(), true);
             }
+        }
+
+        [Test]
+        public void WriteResult_should_fail()
+        {
+            ICsvWriter csvWriter = new CsvWriter();
+            Assert.Throws<ArgumentException>(() => csvWriter.WriteResult(string.Empty, Enumerable.Empty<CsvModel>()));
         }
 
         [TestCaseSource(nameof(CsvWriterTestScenarios))]

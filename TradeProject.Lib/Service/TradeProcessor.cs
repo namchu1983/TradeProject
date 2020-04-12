@@ -5,28 +5,19 @@ namespace TradeProject.Lib.Service
 {
     public class TradeProcessor : ITradeProcessor
     {
-        private readonly ICsvWriter _csvWriter;
-        private readonly ITradeAggregator _tradeAggregator;
-        private readonly IXmlInputReader _xmlInputReader;
-        private readonly ILogConfigurator _logConfigurator;
-
-        public TradeProcessor(IXmlInputReader xmlInputReader, ITradeAggregator tradeAggregator, ICsvWriter csvWriter, ILogConfigurator logConfigurator)
-        {
-            _xmlInputReader = xmlInputReader;
-            _tradeAggregator = tradeAggregator;
-            _csvWriter = csvWriter;
-            _logConfigurator = logConfigurator;
-        }
 
         public void Process(string inputFile, string outputFile, string logFile)
         {
             try
             {
-                _logConfigurator.Configure(logFile);
+                new LogConfigurator().Configure(logFile);
                 Log.Information("Start to process");
-                var trades = _xmlInputReader.GetTrades(inputFile);
-                var csvModels = _tradeAggregator.Aggregate(trades);
-                _csvWriter.WriteResult(outputFile, csvModels);
+                using (var xmlInputReader  = new XmlInputReader(inputFile))
+                {
+                    var trades = xmlInputReader.GetTrades();
+                    var csvModels = new TradeAggregator().Aggregate(trades);
+                    new CsvWriter().WriteResult(outputFile, csvModels);
+                }
                 Log.Information("End to process : success");
             }
             catch (Exception e)

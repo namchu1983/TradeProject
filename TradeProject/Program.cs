@@ -10,8 +10,7 @@ namespace TradeProject
             var inputFilePath = @""; // absolute path
             var outputFilePath = @""; // absolute path
             var logFilePath = @""; // absolute path
-            ITradeProcessor tradeProcessor = new TradeProcessor(new XmlInputReader(), new TradeAggregator(),
-                new CsvWriter(), new LogConfigurator());
+            ITradeProcessor tradeProcessor = new TradeProcessor();
             tradeProcessor.Process(inputFilePath, outputFilePath, logFilePath);
         }
     }
