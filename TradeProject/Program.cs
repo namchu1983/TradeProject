@@ -7,11 +7,12 @@ namespace TradeProject
     {
         private static void Main(string[] args)
         {
-            var inputFilePath = ""; // absolute path
-            var outputFilePath = ""; // absolute path
-            ITradeProcessor tradeProcessor = new TradeProcessor(new XmlInputReader(), new TradeAggregator(), new CsvWriter());
-            tradeProcessor.Process(inputFilePath, outputFilePath);
-            Console.WriteLine("Done");
+            var inputFilePath = @""; // absolute path
+            var outputFilePath = @""; // absolute path
+            var logFilePath = @""; // absolute path
+            ITradeProcessor tradeProcessor = new TradeProcessor(new XmlInputReader(), new TradeAggregator(),
+                new CsvWriter(), new LogConfigurator());
+            tradeProcessor.Process(inputFilePath, outputFilePath, logFilePath);
         }
     }
 }

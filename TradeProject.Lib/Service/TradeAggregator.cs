@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Serilog;
 using TradeProject.Lib.Model;
 
 namespace TradeProject.Lib.Service
@@ -13,6 +14,7 @@ namespace TradeProject.Lib.Service
 
         private IEnumerable<CsvModel> ProcessOneByOne(IEnumerable<Trade> trades)
         {
+            Log.Information("Start to aggregate trades!");
             var csvModels = new Dictionary<string, CsvModel>();
             foreach (var trade in trades)
             {
@@ -27,13 +29,15 @@ namespace TradeProject.Lib.Service
                 csvModel.Value += trade.Value;
                 csvModels[correlationId] = csvModel;
             }
-
+            Log.Information("End to aggregate trades!");
+            Log.Information("Start to set states!");
             foreach (var csvModel in csvModels.Values)
             {
                 csvModel.State = csvModel.Count != csvModel.NumberOfTrades ? "Pending" :
                     csvModel.Value < csvModel.Limit ? "Accepted" : "Rejected";
             }
-            
+            Log.Information("End to set states!");
+            Log.Information("Sort the output result!");
             return csvModels.OrderBy(pair => pair.Key).Select(pair => pair.Value);
         }
 

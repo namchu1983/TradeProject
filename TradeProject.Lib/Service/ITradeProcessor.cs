@@ -2,6 +2,6 @@
 {
     public interface ITradeProcessor
     {
-        void Process(string inputFile, string outputFile);
+        void Process(string inputFile, string outputFile, string logFile);
     }
 }
